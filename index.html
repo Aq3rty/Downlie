@@ -2,90 +2,171 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRINCE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PRINCE ELITE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ПЕРЕМЕННЫЕ ТЕМ (DARK ПО УМОЛЧАНИЮ) */
         :root {
-            --bg-dark: #0e1117;
-            --bg-sidebar: #161d26;
-            --accent-blue: #3d6a97;
-            --text-main: #ffffff;
-            --text-dim: #7d8590;
+            --bg-body: #05070a;
+            --bg-sidebar: #0b0e14;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent: #3d6a97;
+            --accent-gradient: linear-gradient(135deg, #3d6a97 0%, #2a4b6b 100%);
+            --text-main: #e1e4e8;
+            --text-dim: #8a95a3;
+            --gold: #ffcf4d;
+            --msg-in: #161b22;
         }
 
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; background: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+        /* ПЕРЕМЕННЫЕ ДЛЯ СВЕТЛОЙ ТЕМЫ */
+        body.light-theme {
+            --bg-body: #f0f2f5;
+            --bg-sidebar: #ffffff;
+            --glass: rgba(0, 0, 0, 0.03);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text-main: #1c1e21;
+            --text-dim: #65676b;
+            --msg-in: #e4e6eb;
+            --accent-gradient: linear-gradient(135deg, #4b89c3 0%, #3d6a97 100%);
+        }
 
-        /* САЙДБАР (как на скрине 1) */
-        #sidebar { width: 310px; background: var(--bg-sidebar); display: flex; flex-direction: column; border-right: 1px solid #1f2937; }
-        .search-container { padding: 15px; }
-        .search-bar { width: 100%; background: #212833; border: none; padding: 10px; border-radius: 8px; color: white; font-size: 14px; }
-        
-        .chat-item { display: flex; align-items: center; gap: 15px; padding: 15px; cursor: pointer; background: transparent; }
-        .chat-item.active { background: var(--accent-blue); }
-        .chat-icon { width: 40px; height: 40px; background: #5a89b3; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
+        * { box-sizing: border-box; outline: none; transition: background 0.3s ease, color 0.3s ease; }
+        body { 
+            margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-body); 
+            color: var(--text-main); display: flex; height: 100vh; overflow: hidden; 
+        }
 
-        /* ОСНОВНОЙ ЧАТ (как на скрине 2 и 4) */
-        #chat-area { flex: 1; display: flex; flex-direction: column; }
-        #header { height: 60px; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid #1f2937; }
-        .logo-text { font-size: 18px; font-weight: bold; letter-spacing: 2px; color: #5a89b3; }
-        .menu-dots { position: absolute; right: 20px; cursor: pointer; color: var(--text-dim); }
+        /* САЙДБАР */
+        #sidebar { 
+            width: 320px; background: var(--bg-sidebar); display: flex; 
+            flex-direction: column; border-right: 1px solid var(--glass-border); 
+            z-index: 20;
+        }
 
-        /* Фон с паттерном как на скрине 4 */
+        .sidebar-header { padding: 25px 20px 10px; font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+
+        #contacts { flex: 1; overflow-y: auto; padding: 10px; }
+        .section-label { padding: 15px 10px 5px; font-size: 10px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; opacity: 0.6; }
+
+        .chat-item { 
+            display: flex; align-items: center; gap: 12px; padding: 10px 12px; 
+            cursor: pointer; border-radius: 12px; transition: 0.2s; margin-bottom: 2px;
+        }
+        .chat-item:hover { background: var(--glass); }
+        .chat-item.active { background: var(--accent-gradient); box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: white !important; }
+        .chat-item.active small { color: rgba(255,255,255,0.7) !important; }
+
+        .chat-icon { 
+            width: 38px; height: 38px; border-radius: 10px; background: var(--glass); 
+            display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* БЛОК ПРОФИЛЯ С ПЕРЕКЛЮЧАТЕЛЕМ */
+        .my-profile-footer {
+            padding: 15px; border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.05);
+        }
+        .my-ava { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+        .my-info { flex: 1; font-size: 12px; overflow: hidden; }
+        .my-info b { display: block; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+        .theme-toggle {
+            cursor: pointer; width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            font-size: 14px; transition: 0.2s;
+        }
+        .theme-toggle:hover { transform: scale(1.1); background: var(--accent); color: white; }
+
+        /* ЧАТ */
+        #chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        #header { 
+            height: 65px; display: flex; align-items: center; justify-content: center; 
+            background: var(--bg-body); border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        }
+
         #messages { 
-            flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%23ffffff' fill-opacity='0.05'/%3E%3Ccircle cx='50' cy='40' r='1.5' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E");
+            flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 10px;
+            background-image: radial-gradient(circle at 2px 2px, var(--glass-border) 1px, transparent 0);
+            background-size: 32px 32px;
         }
 
-        /* Сообщения в стиле твоего скрина */
-        .msg { max-width: 80%; display: flex; flex-direction: column; position: relative; }
+        .msg { max-width: 75%; display: flex; flex-direction: column; animation: msgShow 0.3s ease-out; }
         .msg.in { align-self: flex-start; }
         .msg.out { align-self: flex-end; }
         
-        .bubble { padding: 10px 18px; border-radius: 12px; font-size: 15px; line-height: 1.4; }
-        .in .bubble { background: #1c242f; color: white; }
-        .out .bubble { background: #2b5278; color: white; }
-        
-        .msg-time { font-size: 10px; color: var(--text-dim); margin: 4px 0; }
-        .out .msg-time { text-align: right; }
-        .crown { color: #ffd700; margin-left: 5px; text-shadow: 0 0 5px gold; }
+        @keyframes msgShow { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ВВОД (как на скрине 1/4) */
-        #footer { height: 70px; display: flex; align-items: center; padding: 0 20px; border-top: 1px solid #1f2937; gap: 15px; }
-        #m-input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
-        .send-btn { background: none; border: none; color: #3d6a97; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+        .bubble { padding: 10px 16px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .in .bubble { background: var(--msg-in); border-bottom-left-radius: 4px; border: 1px solid var(--glass-border); }
+        .out .bubble { background: var(--accent-gradient); border-bottom-right-radius: 4px; color: white; }
 
-        /* МОДАЛКА (как на скрине 3) */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-card { background: #1c242f; padding: 40px; border-radius: 15px; width: 340px; text-align: center; }
-        .modal-ava { width: 80px; height: 80px; border-radius: 50%; background: #d9d9d9; color: #333; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 20px; }
-        .modal-input { width: 100%; background: #242f3d; border: 1px solid #3d4a5a; padding: 12px; border-radius: 8px; color: white; margin-bottom: 12px; }
-        .save-btn { width: 100%; background: #5a89b3; border: none; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .msg-info { font-size: 10px; color: var(--text-dim); margin: 4px 6px; }
+        .out .msg-info { text-align: right; }
 
-        #admin-panel { display: none; background: #4a1a1a; color: white; text-align: center; padding: 5px; font-size: 12px; cursor: pointer; }
+        /* ВВОД */
+        #footer { 
+            padding: 15px 25px; display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--glass-border);
+        }
+        .input-box {
+            flex: 1; background: var(--glass); border: 1px solid var(--glass-border); 
+            border-radius: 12px; padding: 10px 15px; color: var(--text-main); font-family: inherit;
+        }
+        .send-btn { background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+
+        /* МОДАЛКА */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-card { background: var(--bg-sidebar); padding: 40px; border-radius: 24px; width: 340px; text-align: center; border: 1px solid var(--glass-border); }
+        .modal-input { width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px; color: var(--text-main); margin-bottom: 15px; }
+        .save-btn { width: 100%; background: var(--accent-gradient); border: none; color: white; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+
+        .online-dot { width: 7px; height: 7px; background: #4fc3f7; border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 8px #4fc3f7; }
+        .crown { color: var(--gold); text-shadow: 0 0 10px gold; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <div class="search-container"><input type="text" class="search-bar" placeholder="Поиск..."></div>
+    <div class="sidebar-header">PRINCE ELITE</div>
+    
     <div id="contacts">
-        <div class="chat-item active" onclick="setChat('global')">
+        <div class="section-label">Каналы</div>
+        <div class="chat-item active" onclick="setChat('global', 'Общий чат')">
             <div class="chat-icon">#</div>
-            <div><b>Общий чат</b><br><small style="color:var(--text-dim)">Публичная комната</small></div>
+            <div><b>Общий чат</b><br><small style="color:var(--text-dim); font-size:10px">Elite Community</small></div>
         </div>
+        <div class="chat-item" onclick="alert('Канал в разработке')">
+            <div class="chat-icon">📢</div>
+            <div><b>Новости</b><br><small style="color:var(--text-dim); font-size:10px">Свежие апдейты</small></div>
+        </div>
+
+        <div class="section-label">Личные сообщения</div>
+        <div id="user-list"></div>
+    </div>
+
+    <div class="my-profile-footer">
+        <div class="my-ava" id="my-ava-char">P</div>
+        <div class="my-info">
+            <b id="my-name-display">Prince User</b>
+            <small id="my-user-display" style="color:var(--text-dim)">@loading</small>
+        </div>
+        <div class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Сменить тему">🌙</div>
+        <div class="theme-toggle" onclick="if(confirm('Выйти?')){localStorage.clear();location.reload();}" style="color:#ff4d4d">✕</div>
     </div>
 </div>
 
 <div id="chat-area">
-    <div id="admin-panel" onclick="if(confirm('Удалить всё?')) socket.emit('admin_clear')">УДАЛИТЬ ВСЕ СООБЩЕНИЯ (ВЛАДЕЛЕЦ)</div>
     <div id="header">
-        <div class="logo-text" id="chat-title">PRINCE</div>
-        <div class="menu-dots" onclick="if(confirm('Выйти?')){localStorage.clear();location.reload();}">⋮</div>
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 4px; color: var(--accent);" id="chat-title">ОБЩИЙ ЧАТ</div>
     </div>
     <div id="messages"></div>
     <form id="chat-form">
         <div id="footer">
-            <input type="text" id="m-input" placeholder="Написать сообщение..." autocomplete="off">
+            <input type="text" id="m-input" class="input-box" placeholder="Написать сообщение..." autocomplete="off">
             <button type="submit" class="send-btn">ОТПРАВИТЬ</button>
         </div>
     </form>
@@ -93,40 +174,62 @@
 
 <div id="modal">
     <div class="modal-card">
-        <h2 style="margin-top:0">Профиль</h2>
-        <div class="modal-ava">U</div>
-        <input type="text" id="set-name" class="modal-input" placeholder="Имя">
+        <div style="font-size: 40px; margin-bottom: 15px;">💎</div>
+        <h2 style="margin: 0 0 25px 0;">PRINCE ELITE</h2>
+        <input type="text" id="set-name" class="modal-input" placeholder="Ваше имя">
         <input type="text" id="set-user" class="modal-input" placeholder="@username">
-        <button class="save-btn" onclick="saveProfile()">СОХРАНИТЬ</button>
+        <button class="save-btn" onclick="saveProfile()">ПОДКЛЮЧИТЬСЯ</button>
     </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
     const socket = io();
-    let myProfile = JSON.parse(localStorage.getItem('prince_v2')) || null;
+    let myProfile = JSON.parse(localStorage.getItem('prince_elite_v6')) || null;
     let currentChat = 'global';
     let allMessages = [];
+
+    // ТЕМА
+    let currentTheme = localStorage.getItem('prince_theme') || 'dark';
+    if(currentTheme === 'light') toggleTheme(true);
+
+    function toggleTheme(init = false) {
+        if(!init) {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('prince_theme', currentTheme);
+        }
+        
+        const btn = document.getElementById('theme-btn');
+        if(currentTheme === 'light') {
+            document.body.classList.add('light-theme');
+            btn.innerText = '☀️';
+        } else {
+            document.body.classList.remove('light-theme');
+            btn.innerText = '🌙';
+        }
+    }
 
     if (!myProfile) {
         document.getElementById('modal').style.display = 'flex';
     } else {
-        init();
+        initSession();
     }
 
     function saveProfile() {
-        const n = document.getElementById('set-name').value;
-        const u = document.getElementById('set-user').value.toLowerCase().replace('@','');
+        const n = document.getElementById('set-name').value.trim();
+        const u = document.getElementById('set-user').value.toLowerCase().trim().replace('@','');
         if(n && u) {
-            myProfile = { name: n, username: u, avatar: 'https://ui-avatars.com/api/?name='+n };
-            localStorage.setItem('prince_v2', JSON.stringify(myProfile));
+            myProfile = { name: n, username: u };
+            localStorage.setItem('prince_elite_v6', JSON.stringify(myProfile));
             location.reload();
         }
     }
 
-    function init() {
+    function initSession() {
         socket.emit('auth', myProfile);
-        if(myProfile.username === 'admin') document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('my-name-display').innerText = myProfile.name;
+        document.getElementById('my-user-display').innerText = '@' + myProfile.username;
+        document.getElementById('my-ava-char').innerText = myProfile.name[0].toUpperCase();
     }
 
     socket.on('init_data', (data) => {
@@ -137,16 +240,22 @@
     socket.on('new_message', (m) => {
         allMessages.push(m);
         render();
-        if(m.recipient === myProfile.username && currentChat === m.sender_user) {
-            socket.emit('read_chat', { me: myProfile.username, withWhom: currentChat });
-        }
     });
 
-    socket.on('messages_read', (data) => {
-        allMessages.forEach(m => {
-            if(m.sender_user === data.from && m.recipient === data.by) m.read = true;
+    socket.on('update_users', (users) => {
+        const list = document.getElementById('user-list');
+        list.innerHTML = '';
+        Object.keys(users).forEach(u => {
+            if(u !== myProfile.username) {
+                const user = users[u];
+                const statusIcon = user.online ? '<span class="online-dot"></span>' : '';
+                list.innerHTML += `
+                    <div class="chat-item ${currentChat===u?'active':''}" onclick="setChat('${u}', '${user.name}')">
+                        <div class="chat-icon">${user.name[0]}</div>
+                        <div><b>${user.name} ${u==='admin'?'<span class="crown">👑</span>':''}</b><br><small style="color:var(--text-dim); font-size:10px">${statusIcon}${user.online?'online':'offline'}</small></div>
+                    </div>`;
+            }
         });
-        render();
     });
 
     function render() {
@@ -160,13 +269,12 @@
 
         filtered.forEach(m => {
             const isMe = m.sender_user === myProfile.username;
-            const isOwner = m.sender_user === 'admin' ? '<span class="crown">👑</span>' : '';
             const div = document.createElement('div');
             div.className = `msg ${isMe ? 'out' : 'in'}`;
             div.innerHTML = `
-                ${!isMe ? `<div class="msg-time" style="text-align:left"><b>${m.sender}</b> ${isOwner}</div>` : ''}
+                ${!isMe ? `<div class="msg-info"><b>${m.sender}</b></div>` : ''}
                 <div class="bubble">${m.text}</div>
-                <div class="msg-time">${m.time} ${isMe ? (m.read ? '<span style="color:#4fc3f7">✓✓</span>' : '✓') : ''}</div>
+                <div class="msg-info">${m.time}</div>
             `;
             box.appendChild(div);
         });
@@ -187,19 +295,11 @@
         }
     };
 
-    socket.on('update_users', (users) => {
-        const list = document.getElementById('contacts');
-        list.innerHTML = `<div class="chat-item ${currentChat==='global'?'active':''}" onclick="setChat('global')"><div class="chat-icon">#</div><div><b>Общий чат</b><br><small>Публичная комната</small></div></div>`;
-        for(let u in users) {
-            if(u !== myProfile.username) {
-                list.innerHTML += `<div class="chat-item ${currentChat===u?'active':''}" onclick="setChat('${u}')"><div class="chat-icon" style="background:#2b5278">${users[u].name[0]}</div><div><b>${users[u].name} ${u==='admin'?'👑':''}</b><br><small>${users[u].online?'● online':'offline'}</small></div></div>`;
-            }
-        }
-    });
-
-    function setChat(id) {
+    function setChat(id, title) {
         currentChat = id;
-        socket.emit('read_chat', { me: myProfile.username, withWhom: currentChat });
+        document.getElementById('chat-title').innerText = title.toUpperCase();
+        document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+        // Принудительная подсветка активного элемента
         render();
     }
 </script>
