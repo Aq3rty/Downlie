@@ -1,43 +1,52 @@
 const express = require('express');
 const app = express();
-const http = require('http').Server(app);
+const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-const path = require('path');
 
-app.use(express.static('public'));
+app.use(express.static(__dirname));
 
 let users = {}; 
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+let messages = [];
 
 io.on('connection', (socket) => {
     socket.on('auth', (userData) => {
-        users[socket.id] = {
-            name: userData.name || 'User',
-            username: userData.username || 'id' + socket.id.substr(0,4),
-            avatar: userData.avatar || `https://ui-avatars.com/api/?name=${userData.name}&background=334155&color=fff`
-        };
-        io.emit('update users', users);
+        socket.username = userData.username;
+        users[socket.username] = { ...userData, socketId: socket.id, online: true };
+        socket.emit('init_data', { messages, users });
+        io.emit('update_users', users);
     });
 
-    socket.on('message', (data) => {
+    socket.on('message', (msgData) => {
         const fullMsg = {
-            sender: users[socket.id]?.name || 'System',
-            sender_user: users[socket.id]?.username || 'anon',
-            text: data.text,
-            recipient: data.recipient,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            ...msgData,
+            id: Date.now(),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            read: false
         };
-        io.emit('new message', fullMsg); 
+        messages.push(fullMsg);
+        io.emit('new_message', fullMsg);
+    });
+
+    socket.on('read_chat', (data) => {
+        messages.forEach(m => {
+            if (m.recipient === data.me && m.sender_user === data.withWhom) m.read = true;
+        });
+        io.emit('messages_read', { by: data.me, from: data.withWhom });
+    });
+
+    socket.on('admin_clear', () => {
+        if (socket.username === 'admin') {
+            messages = [];
+            io.emit('init_data', { messages, users });
+        }
     });
 
     socket.on('disconnect', () => {
-        delete users[socket.id];
-        io.emit('update users', users);
+        if (socket.username && users[socket.username]) {
+            users[socket.username].online = false;
+            io.emit('update_users', users);
+        }
     });
 });
 
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log(`Prince Server: Port ${PORT}`));
+http.listen(3000, () => console.log('PRINCE Server Run'));
