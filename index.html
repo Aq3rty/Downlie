@@ -3,64 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prince Messenger</title>
+    <title>Prince Messenger 2.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a; --sidebar-color: #1e293b; --accent-color: #8b5cf6;
-            --text-color: #f8fafc; --message-in: #334155; --message-out: #7c3aed;
+            --bg: #0f172a; --side: #1e293b; --acc: #8b5cf6;
+            --txt: #f8fafc; --in: #334155; --out: #7c3aed;
         }
-        body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; height: 100vh; overflow: hidden; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--txt); display: flex; height: 100vh; }
         
-        #sidebar { width: 260px; background-color: var(--sidebar-color); border-right: 1px solid #334155; display: flex; flex-direction: column; padding: 20px; }
-        .logo { font-size: 24px; font-weight: 600; color: var(--accent-color); margin-bottom: 20px; }
+        /* Sidebar */
+        #sidebar { width: 300px; background: var(--side); border-right: 1px solid #334155; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; background: rgba(0,0,0,0.2); }
+        .logo { font-size: 24px; font-weight: 600; color: var(--acc); margin-bottom: 15px; display: block; }
+        #username { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--acc); color: white; border-radius: 8px; outline: none; box-sizing: border-box; }
+        
+        .contact-list { flex: 1; overflow-y: auto; }
+        .contact { display: flex; align-items: center; gap: 10px; padding: 15px 20px; cursor: pointer; transition: 0.2s; }
+        .contact:hover { background: rgba(255,255,255,0.05); }
+        .contact.active { background: rgba(139, 92, 246, 0.2); border-left: 4px solid var(--acc); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #475569; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-        #main-chat { flex: 1; display: flex; flex-direction: column; position: relative; }
-        #chat-header { padding: 15px 25px; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #334155; }
+        /* Chat Window */
+        #main { flex: 1; display: flex; flex-direction: column; }
+        #header { padding: 18px 25px; background: rgba(30,41,59,0.8); border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
         
-        #chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        
-        .msg { max-width: 70%; padding: 10px 16px; border-radius: 18px; font-size: 14px; position: relative; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .msg.in { align-self: flex-start; background: var(--message-in); border-bottom-left-radius: 4px; }
-        .msg.out { align-self: flex-end; background: var(--message-out); border-bottom-right-radius: 4px; }
-        .msg-info { font-size: 10px; opacity: 0.6; display: block; margin-bottom: 4px; font-weight: 600; }
+        /* Bubbles */
+        .wrapper { display: flex; flex-direction: column; max-width: 70%; }
+        .wrapper.out { align-self: flex-end; align-items: flex-end; }
+        .wrapper.in { align-self: flex-start; align-items: flex-start; }
+        .msg { padding: 10px 16px; border-radius: 18px; font-size: 14px; position: relative; word-wrap: break-word; }
+        .in .msg { background: var(--in); border-bottom-left-radius: 4px; }
+        .out .msg { background: var(--out); border-bottom-right-radius: 4px; }
+        .msg-info { font-size: 10px; opacity: 0.5; margin: 4px 6px; }
 
-        #typing-indicator { font-size: 12px; color: var(--accent-color); padding: 5px 25px; height: 20px; font-style: italic; }
+        #typing { height: 20px; padding: 0 20px; font-size: 12px; color: var(--acc); }
 
-        #input-area { padding: 20px; background: var(--sidebar-color); display: flex; gap: 10px; align-items: center; }
-        input { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 12px; color: white; outline: none; flex: 1; }
-        #username { width: 100px; flex: none; border-color: var(--accent-color); }
-        button { background: var(--accent-color); border: none; color: white; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; }
-        
-        /* Скроллбар */
-        #chat-messages::-webkit-scrollbar { width: 6px; }
-        #chat-messages::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        #footer { padding: 20px; background: var(--side); display: flex; gap: 10px; }
+        #footer input { flex: 1; background: var(--bg); border: 1px solid #334155; padding: 12px; border-radius: 12px; color: white; outline: none; }
+        #footer button { background: var(--acc); border: none; padding: 0 20px; border-radius: 12px; color: white; cursor: pointer; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
-        <div class="logo">👑 Prince</div>
-        <div style="font-size: 13px; color: #94a3b8;">Добро пожаловать в королевство быстрой связи.</div>
-        <div style="margin-top: auto; font-size: 11px; opacity: 0.4;">© 2026 Prince Messenger</div>
+        <div class="sidebar-header">
+            <span class="logo">👑 Prince</span>
+            <input type="text" id="username" value="Prince_User" maxlength="12">
+        </div>
+        <div class="contact-list" id="contacts">
+            <div class="contact active" onclick="setRecipient('global', 'Общий зал')">
+                <div class="avatar">🌍</div>
+                <div><b>Общий зал</b></div>
+            </div>
+            </div>
     </div>
 
-    <div id="main-chat">
-        <div id="chat-header">
-            <div style="font-weight: 600;">Общий зал</div>
-            <div style="font-size: 12px; color: #10b981;">● Онлайн</div>
+    <div id="main">
+        <div id="header">
+            <div>Чат: <b id="chat-title">Общий зал</b></div>
+            <div id="status" style="font-size: 12px; color: #10b981;">● онлайн</div>
         </div>
 
-        <div id="chat-messages"></div>
-        <div id="typing-indicator"></div>
+        <div id="messages"></div>
+        <div id="typing"></div>
 
-        <form id="message-form">
-            <div id="input-area">
-                <input type="text" id="username" placeholder="Ваш ник" maxlength="15">
-                <input type="text" id="msg-input" placeholder="Введите сообщение..." required autocomplete="off">
-                <button type="submit">🕊</button>
+        <form id="chat-form">
+            <div id="footer">
+                <input type="text" id="m-input" placeholder="Написать сообщение..." autocomplete="off" required>
+                <button type="submit">➤</button>
             </div>
         </form>
     </div>
@@ -68,55 +80,76 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        const chat = document.getElementById('chat-messages');
-        const form = document.getElementById('message-form');
-        const input = document.getElementById('msg-input');
-        const userField = document.getElementById('username');
-        const typingDiv = document.getElementById('typing-indicator');
+        let recipient = 'global';
+        const messages = document.getElementById('messages');
+        const userInp = document.getElementById('username');
 
-        // Функция отрисовки сообщения
-        function appendMessage(data) {
-            const isMe = data.user === userField.value;
-            const div = document.createElement('div');
-            div.classList.add('msg', isMe ? 'out' : 'in');
-            div.innerHTML = `<span class="msg-info">${data.user}</span>${data.text}`;
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
+        // Регистрация ника
+        userInp.addEventListener('change', () => socket.emit('set nickname', userInp.value));
+        socket.emit('set nickname', userInp.value);
+
+        function setRecipient(id, name) {
+            recipient = id;
+            document.getElementById('chat-title').textContent = name;
+            messages.innerHTML = ''; // Очистка при смене чата
+            document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
         }
 
-        // Загрузка истории
-        socket.on('load history', (history) => {
-            chat.innerHTML = '';
-            history.forEach(appendMessage);
-        });
-
-        // Получение нового сообщения
-        socket.on('chat message', (data) => {
-            typingDiv.textContent = ''; // Убираем статус печати
-            appendMessage(data);
-        });
-
-        // Статус "печатает"
-        input.addEventListener('input', () => {
-            socket.emit('typing', userField.value || 'Кто-то');
-        });
-
-        let typingTimeout;
-        socket.on('typing', (user) => {
-            typingDiv.textContent = `${user} печатает...`;
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => { typingDiv.textContent = ''; }, 2000);
+        // Список пользователей
+        socket.on('update users', (users) => {
+            const list = document.getElementById('contacts');
+            list.innerHTML = `<div class="contact ${recipient==='global'?'active':''}" onclick="setRecipient('global', 'Общий зал')"><div class="avatar">🌍</div><div><b>Общий зал</b></div></div>`;
+            
+            for (let id in users) {
+                if (id !== socket.id) {
+                    const div = document.createElement('div');
+                    div.className = `contact ${recipient === id ? 'active' : ''}`;
+                    div.onclick = () => setRecipient(id, users[id]);
+                    div.innerHTML = `<div class="avatar" style="background:#8b5cf6">${users[id][0]}</div><div><b>${users[id]}</b></div>`;
+                    list.appendChild(div);
+                }
+            }
         });
 
         // Отправка
-        form.addEventListener('submit', (e) => {
+        document.getElementById('chat-form').onsubmit = (e) => {
             e.preventDefault();
-            if (input.value) {
-                const data = { user: userField.value || 'Аноним', text: input.value };
-                socket.emit('chat message', data);
-                input.value = '';
-            }
+            const inp = document.getElementById('m-input');
+            socket.emit('send message', { text: inp.value, recipient: recipient });
+            inp.value = '';
+        };
+
+        // Получение
+        socket.on('new message', (data) => {
+            const isMe = data.sender === userInp.value;
+            const wrap = document.createElement('div');
+            wrap.className = `wrapper ${isMe ? 'out' : 'in'}`;
+            wrap.innerHTML = `
+                <span class="msg-info">${data.sender} • ${data.time}</span>
+                <div class="msg">${data.text}</div>
+            `;
+            messages.appendChild(wrap);
+            messages.scrollTop = messages.scrollHeight;
+            document.getElementById('typing').textContent = '';
         });
+
+        // Печатает...
+        document.getElementById('m-input').oninput = () => socket.emit('typing');
+        let tTime;
+        socket.on('typing', (user) => {
+            document.getElementById('typing').textContent = `${user} печатает...`;
+            clearTimeout(tTime);
+            tTime = setTimeout(() => document.getElementById('typing').textContent = '', 2000);
+        });
+
+        socket.on('load history', (h) => h.forEach(m => {
+            // История только для общего зала в этом примере
+            const wrap = document.createElement('div');
+            wrap.className = `wrapper in`;
+            wrap.innerHTML = `<span class="msg-info">${m.sender} • ${m.time}</span><div class="msg">${m.text}</div>`;
+            messages.appendChild(wrap);
+        }));
     </script>
 </body>
 </html>
