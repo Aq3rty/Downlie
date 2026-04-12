@@ -2,158 +2,181 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prince Messenger Elite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prince Messenger</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0f172a; --side: #1e293b; --acc: #8b5cf6;
             --txt: #f8fafc; --in: #334155; --out: #7c3aed;
         }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--txt); display: flex; height: 100vh; overflow: hidden; }
         
-        /* Sidebar */
-        #sidebar { width: 320px; background: var(--side); border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .logo-area { padding: 20px; background: rgba(0,0,0,0.2); text-align: center; }
-        .logo { font-size: 22px; font-weight: 600; color: var(--acc); }
-
-        /* Настройки профиля */
-        #profile-settings { padding: 15px; background: rgba(139, 92, 246, 0.1); border-bottom: 1px solid #334155; }
-        .set-input { width: 100%; padding: 8px; margin-top: 5px; background: var(--bg); border: 1px solid #475569; color: white; border-radius: 6px; font-size: 12px; box-sizing: border-box; }
+        /* Sidebar - Адаптивность */
+        #sidebar { 
+            width: 300px; background: var(--side); border-right: 1px solid #334155; 
+            display: flex; flex-direction: column; transition: 0.3s; z-index: 100;
+        }
         
-        .contact-list { flex: 1; overflow-y: auto; }
-        .contact { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-left: 3px solid transparent; }
-        .contact:hover { background: rgba(255,255,255,0.05); }
-        .contact.active { background: rgba(139, 92, 246, 0.15); border-left-color: var(--acc); }
-        .ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #475569; }
+        @media (max-width: 768px) {
+            #sidebar { position: absolute; left: -100%; height: 100%; width: 85%; }
+            #sidebar.open { left: 0; }
+            .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+            .overlay.active { display: block; }
+        }
 
-        /* Chat */
-        #main { flex: 1; display: flex; flex-direction: column; }
-        #header { padding: 15px 25px; background: rgba(30,41,59,0.9); border-bottom: 1px solid #334155; font-weight: 600; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .side-head { padding: 15px; background: #111827; }
+        .logo { font-size: 20px; font-weight: 600; color: var(--acc); }
         
-        .msg-row { display: flex; flex-direction: column; max-width: 75%; }
+        .profile-box { margin-top: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; }
+        .profile-box input { width: 100%; padding: 8px; margin-bottom: 5px; background: var(--bg); border: 1px solid #475569; color: white; border-radius: 6px; font-size: 12px; }
+
+        .contacts { flex: 1; overflow-y: auto; }
+        .contact { display: flex; align-items: center; gap: 12px; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .contact.active { background: rgba(139, 92, 246, 0.2); }
+        .ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+
+        /* Main */
+        #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        #header { 
+            padding: 12px 20px; background: rgba(30,41,59,0.9); border-bottom: 1px solid #334155; 
+            display: flex; align-items: center; gap: 15px;
+        }
+        
+        .menu-btn { display: none; font-size: 24px; cursor: pointer; color: var(--acc); }
+        @media (max-width: 768px) { .menu-btn { display: block; } }
+
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .msg-row { display: none; flex-direction: column; max-width: 85%; }
+        .msg-row.active { display: flex; } /* Показываем только текущий чат */
         .msg-row.out { align-self: flex-end; align-items: flex-end; }
-        .msg-row.in { align-self: flex-start; align-items: flex-start; }
         
-        .msg-bubble { padding: 10px 15px; border-radius: 15px; font-size: 14px; position: relative; line-height: 1.4; }
-        .in .msg-bubble { background: var(--in); border-bottom-left-radius: 2px; }
-        .out .msg-bubble { background: var(--out); border-bottom-right-radius: 2px; }
-        
-        .info { font-size: 10px; opacity: 0.5; margin-bottom: 3px; display: flex; gap: 8px; }
+        .bubble { padding: 10px 14px; border-radius: 15px; font-size: 14px; background: var(--in); position: relative; }
+        .out .bubble { background: var(--out); }
+        .m-info { font-size: 10px; opacity: 0.5; margin-bottom: 3px; }
 
         #footer { padding: 15px; background: var(--side); display: flex; gap: 10px; }
-        #footer input { flex: 1; background: var(--bg); border: 1px solid #334155; padding: 12px; border-radius: 10px; color: white; outline: none; }
-        #footer button { background: var(--acc); border: none; padding: 0 20px; border-radius: 10px; color: white; cursor: pointer; }
+        #m-input { flex: 1; background: var(--bg); border: 1px solid #334155; padding: 12px; border-radius: 10px; color: white; outline: none; font-size: 16px; }
+        #send-btn { background: var(--acc); border: none; padding: 0 15px; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="sidebar">
-        <div class="logo-area"><span class="logo">👑 PRINCE</span></div>
-        
-        <div id="profile-settings">
-            <div style="font-size: 11px; font-weight: 600; color: var(--acc)">МОЙ ПРОФИЛЬ</div>
-            <input type="text" id="my-name" class="set-input" placeholder="Ваш ник..." value="Принц">
-            <input type="text" id="my-ava" class="set-input" placeholder="Ссылка на фото аватара...">
-            <button onclick="saveProfile()" style="width: 100%; margin-top: 8px; font-size: 10px; padding: 5px; border-radius: 4px; border: none; background: var(--acc); color: white; cursor: pointer;">Сохранить</button>
-        </div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-        <div class="contact-list" id="contacts">
-            <div class="contact active" onclick="setRecip('global', 'Общий зал')">
-                <div class="ava" style="display:flex; align-items:center; justify-content:center;">🌍</div>
-                <div><b>Общий зал</b></div>
+    <div id="sidebar">
+        <div class="side-head">
+            <span class="logo">PRINCE 👑</span>
+            <div class="profile-box">
+                <input type="text" id="p-name" placeholder="Ник" value="Принц">
+                <input type="text" id="p-ava" placeholder="URL аватара">
+                <button onclick="updateProfile()" style="width:100%; background:var(--acc); border:none; color:white; border-radius:4px; font-size:10px; padding:4px;">OK</button>
+            </div>
+        </div>
+        <div class="contacts" id="contacts">
+            <div class="contact active" onclick="switchChat('global', 'Общий зал')">
+                <div class="ava" style="background:var(--acc); display:flex; align-items:center; justify-content:center;">🌍</div>
+                <b>Общий зал</b>
             </div>
         </div>
     </div>
 
     <div id="main">
-        <div id="header">Чат: <span id="chat-title">Общий зал</span></div>
+        <div id="header">
+            <div class="menu-btn" onclick="toggleMenu()">☰</div>
+            <b id="chat-title">Общий зал</b>
+        </div>
         <div id="messages"></div>
         <form id="chat-form">
             <div id="footer">
-                <input type="text" id="msg-input" placeholder="Введите сообщение..." autocomplete="off" required>
-                <button type="submit">ОТПРАВИТЬ</button>
+                <input type="text" id="m-input" placeholder="Сообщение..." autocomplete="off">
+                <button type="submit" id="send-btn">➤</button>
             </div>
         </form>
     </div>
 
+    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let recipient = 'global';
-        const msgDiv = document.getElementById('messages');
+        let currentRecipient = 'global';
+        const msgContainer = document.getElementById('messages');
+        const sound = document.getElementById('notif-sound');
+        
+        // Хранилище сообщений в памяти браузера, чтобы не пропадали при переключении
+        let allMessages = [];
 
-        // Настройки профиля
-        function saveProfile() {
-            const data = {
-                name: document.getElementById('my-name').value,
-                avatar: document.getElementById('my-ava').value || `https://ui-avatars.com/api/?name=${document.getElementById('my-name').value}&background=8b5cf6&color=fff`
-            };
-            socket.emit('update profile', data);
-            alert('Профиль обновлен!');
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
         }
 
-        function setRecip(id, name) {
-            recipient = id;
+        function updateProfile() {
+            const name = document.getElementById('p-name').value;
+            const avatar = document.getElementById('p-ava').value || `https://ui-avatars.com/api/?name=${name}&background=8b5cf6&color=fff`;
+            socket.emit('update profile', { name, avatar });
+        }
+
+        function switchChat(id, name) {
+            currentRecipient = id;
             document.getElementById('chat-title').textContent = name;
-            msgDiv.innerHTML = ''; 
+            renderMessages();
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
-            if(event) event.currentTarget.classList.add('active');
+            if(window.innerWidth <= 768) toggleMenu();
         }
 
-        // Список контактов
+        // Отрисовка сообщений только для текущего чата
+        function renderMessages() {
+            msgContainer.innerHTML = '';
+            const filtered = allMessages.filter(m => 
+                (currentRecipient === 'global' && m.recipient === 'global') ||
+                (m.recipient === socket.id && m.sender_id === currentRecipient) ||
+                (m.sender_id === socket.id && m.recipient === currentRecipient)
+            );
+            
+            filtered.forEach(data => {
+                const isMe = data.sender_id === socket.id;
+                const row = document.createElement('div');
+                row.className = `msg-row active ${isMe ? 'out' : ''}`;
+                row.innerHTML = `<div class="m-info">${data.sender} • ${data.time}</div><div class="bubble">${data.text}</div>`;
+                msgContainer.appendChild(row);
+            });
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+
+        socket.on('new message', (data) => {
+            allMessages.push(data);
+            renderMessages();
+            if (data.sender_id !== socket.id) {
+                sound.play().catch(() => {}); // Воспроизвести звук (если разрешено браузером)
+            }
+        });
+
         socket.on('update users', (users) => {
             const list = document.getElementById('contacts');
-            const globalActive = recipient === 'global' ? 'active' : '';
-            list.innerHTML = `<div class="contact ${globalActive}" onclick="setRecip('global', 'Общий зал')"><div class="ava" style="display:flex; align-items:center; justify-content:center;">🌍</div><div><b>Общий зал</b></div></div>`;
-            
+            list.innerHTML = `<div class="contact ${currentRecipient==='global'?'active':''}" onclick="switchChat('global', 'Общий зал')"><div class="ava" style="background:var(--acc); display:flex; align-items:center; justify-content:center;">🌍</div><b>Общий зал</b></div>`;
             for (let id in users) {
                 if (id !== socket.id) {
-                    const active = recipient === id ? 'active' : '';
-                    const u = users[id];
-                    list.innerHTML += `
-                        <div class="contact ${active}" onclick="setRecip('${id}', '${u.name}')">
-                            <img src="${u.avatar || 'https://ui-avatars.com/api/?name='+u.name}" class="ava">
-                            <div><b>${u.name}</b></div>
-                        </div>`;
+                    list.innerHTML += `<div class="contact ${currentRecipient===id?'active':''}" onclick="switchChat('${id}', '${users[id].name}')"><img src="${users[id].avatar}" class="ava"><b>${users[id].name}</b></div>`;
                 }
             }
         });
 
-        // Отправка (ПОФИКСЕНО)
         document.getElementById('chat-form').onsubmit = (e) => {
             e.preventDefault();
-            const inp = document.getElementById('msg-input');
+            const inp = document.getElementById('m-input');
             if(inp.value.trim()) {
-                socket.emit('message', { text: inp.value, recipient: recipient });
+                socket.emit('message', { text: inp.value, recipient: currentRecipient });
                 inp.value = '';
             }
         };
 
-        // Получение (ПОФИКСЕНО)
-        socket.on('new message', (data) => {
-            const isMe = data.sender_id === socket.id;
-            const row = document.createElement('div');
-            row.className = `msg-row ${isMe ? 'out' : 'in'}`;
-            
-            row.innerHTML = `
-                <div class="info"><b>${data.sender}</b> <span>${data.time}</span></div>
-                <div class="msg-bubble">${data.text}</div>
-            `;
-            msgDiv.appendChild(row);
-            msgDiv.scrollTop = msgDiv.scrollHeight;
-        });
-
         socket.on('load history', (h) => {
-            msgDiv.innerHTML = '';
-            h.forEach(m => {
-                const row = document.createElement('div');
-                row.className = `msg-row in`;
-                row.innerHTML = `<div class="info"><b>${m.sender}</b> <span>${m.time}</span></div><div class="msg-bubble">${m.text}</div>`;
-                msgDiv.appendChild(row);
-            });
-            msgDiv.scrollTop = msgDiv.scrollHeight;
+            allMessages = h;
+            renderMessages();
         });
     </script>
 </body>
