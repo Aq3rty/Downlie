@@ -6,7 +6,6 @@
     <title>PRINCE ELITE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ПЕРЕМЕННЫЕ ТЕМ (DARK ПО УМОЛЧАНИЮ) */
         :root {
             --bg-body: #05070a;
             --bg-sidebar: #0b0e14;
@@ -20,7 +19,6 @@
             --msg-in: #161b22;
         }
 
-        /* ПЕРЕМЕННЫЕ ДЛЯ СВЕТЛОЙ ТЕМЫ */
         body.light-theme {
             --bg-body: #f0f2f5;
             --bg-sidebar: #ffffff;
@@ -38,7 +36,6 @@
             color: var(--text-main); display: flex; height: 100vh; overflow: hidden; 
         }
 
-        /* САЙДБАР */
         #sidebar { 
             width: 320px; background: var(--bg-sidebar); display: flex; 
             flex-direction: column; border-right: 1px solid var(--glass-border); 
@@ -64,7 +61,6 @@
             border: 1px solid var(--glass-border);
         }
 
-        /* БЛОК ПРОФИЛЯ С ПЕРЕКЛЮЧАТЕЛЕМ */
         .my-profile-footer {
             padding: 15px; border-top: 1px solid var(--glass-border);
             display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.05);
@@ -81,7 +77,6 @@
         }
         .theme-toggle:hover { transform: scale(1.1); background: var(--accent); color: white; }
 
-        /* ЧАТ */
         #chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
         #header { 
             height: 65px; display: flex; align-items: center; justify-content: center; 
@@ -101,14 +96,25 @@
         
         @keyframes msgShow { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .bubble { padding: 10px 16px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .bubble { padding: 10px 16px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; }
         .in .bubble { background: var(--msg-in); border-bottom-left-radius: 4px; border: 1px solid var(--glass-border); }
         .out .bubble { background: var(--accent-gradient); border-bottom-right-radius: 4px; color: white; }
 
         .msg-info { font-size: 10px; color: var(--text-dim); margin: 4px 6px; }
         .out .msg-info { text-align: right; }
 
-        /* ВВОД */
+        /* ФАЙЛЫ В ЧАТЕ */
+        .file-msg { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+        .file-icon { font-size: 20px; }
+        .file-img { max-width: 200px; border-radius: 10px; cursor: pointer; }
+
+        /* РЕАКЦИИ */
+        .react-badge { 
+            font-size: 11px; margin-top: -8px; background: var(--bg-sidebar); border: 1px solid var(--glass-border); 
+            padding: 1px 5px; border-radius: 8px; align-self: flex-start; z-index: 2; cursor: pointer;
+        }
+        .out .react-badge { align-self: flex-end; }
+
         #footer { 
             padding: 15px 25px; display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--glass-border);
         }
@@ -118,7 +124,6 @@
         }
         .send-btn { background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 11px; }
 
-        /* МОДАЛКА */
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-card { background: var(--bg-sidebar); padding: 40px; border-radius: 24px; width: 340px; text-align: center; border: 1px solid var(--glass-border); }
         .modal-input { width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px; color: var(--text-main); margin-bottom: 15px; }
@@ -132,18 +137,12 @@
 
 <div id="sidebar">
     <div class="sidebar-header">PRINCE ELITE</div>
-    
     <div id="contacts">
         <div class="section-label">Каналы</div>
         <div class="chat-item active" onclick="setChat('global', 'Общий чат')">
             <div class="chat-icon">#</div>
             <div><b>Общий чат</b><br><small style="color:var(--text-dim); font-size:10px">Elite Community</small></div>
         </div>
-        <div class="chat-item" onclick="alert('Канал в разработке')">
-            <div class="chat-icon">📢</div>
-            <div><b>Новости</b><br><small style="color:var(--text-dim); font-size:10px">Свежие апдейты</small></div>
-        </div>
-
         <div class="section-label">Личные сообщения</div>
         <div id="user-list"></div>
     </div>
@@ -166,6 +165,9 @@
     <div id="messages"></div>
     <form id="chat-form">
         <div id="footer">
+            <input type="file" id="file-input" style="display:none" onchange="sendFile(this)">
+            <button type="button" class="send-btn" onclick="document.getElementById('file-input').click()">📎</button>
+            
             <input type="text" id="m-input" class="input-box" placeholder="Написать сообщение..." autocomplete="off">
             <button type="submit" class="send-btn">ОТПРАВИТЬ</button>
         </div>
@@ -189,7 +191,6 @@
     let currentChat = 'global';
     let allMessages = [];
 
-    // ТЕМА
     let currentTheme = localStorage.getItem('prince_theme') || 'dark';
     if(currentTheme === 'light') toggleTheme(true);
 
@@ -198,7 +199,6 @@
             currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
             localStorage.setItem('prince_theme', currentTheme);
         }
-        
         const btn = document.getElementById('theme-btn');
         if(currentTheme === 'light') {
             document.body.classList.add('light-theme');
@@ -230,6 +230,24 @@
         document.getElementById('my-name-display').innerText = myProfile.name;
         document.getElementById('my-user-display').innerText = '@' + myProfile.username;
         document.getElementById('my-ava-char').innerText = myProfile.name[0].toUpperCase();
+    }
+
+    // ОТПРАВКА ФАЙЛА
+    function sendFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            socket.emit('message', {
+                sender: myProfile.name,
+                sender_user: myProfile.username,
+                recipient: currentChat,
+                fileData: e.target.result,
+                fileName: file.name
+            });
+        };
+        reader.readAsDataURL(file);
+        input.value = '';
     }
 
     socket.on('init_data', (data) => {
@@ -271,10 +289,21 @@
             const isMe = m.sender_user === myProfile.username;
             const div = document.createElement('div');
             div.className = `msg ${isMe ? 'out' : 'in'}`;
+            
+            let content = m.text;
+            // Если это файл
+            if (m.type === 'file') {
+                if (m.fileData.startsWith('data:image')) {
+                    content = `<img src="${m.fileData}" class="file-img" onclick="window.open(this.src)">`;
+                } else {
+                    content = `<a href="${m.fileData}" download="${m.fileName}" class="file-msg"><span class="file-icon">📁</span> ${m.fileName}</a>`;
+                }
+            }
+
             div.innerHTML = `
                 ${!isMe ? `<div class="msg-info"><b>${m.sender}</b></div>` : ''}
-                <div class="bubble">${m.text}</div>
-                <div class="msg-info">${m.time}</div>
+                <div class="bubble">${content}</div>
+                <div class="msg-info">${m.time} ${m.read ? '✓✓' : '✓'}</div>
             `;
             box.appendChild(div);
         });
@@ -299,8 +328,8 @@
         currentChat = id;
         document.getElementById('chat-title').innerText = title.toUpperCase();
         document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-        // Принудительная подсветка активного элемента
         render();
+        socket.emit('read_chat', { me: myProfile.username, withWhom: id });
     }
 </script>
 </body>
