@@ -1887,8 +1887,44 @@ function init() {
         updateProfile();
     }
 }
-
+<button id="updateBtn" style="display:none;" class="header-btn">Обновить Shark</button>
 init();
+<script>
+async function checkUpdate() {
+  try {
+    const res = await fetch("https://example.com/version.json");
+    const data = await res.json();
+
+    const current = localStorage.getItem("shark_version") || "1.0.0";
+    const latest = data.version;
+
+    if (current !== latest) {
+      document.getElementById("updateBtn").style.display = "block";
+      window.latestUpdateURL = data.url;
+    }
+  } catch (e) {
+    console.log("Ошибка проверки обновления:", e);
+  }
+}
+
+checkUpdate();
+<script>
+document.getElementById("updateBtn").addEventListener("click", async () => {
+  const url = window.latestUpdateURL;
+  if (!url) return;
+
+  const savePath = "Shark_update.zip";
+
+  const request = nw.require("request");
+  const fs = nw.require("fs");
+
+  request(url)
+    .pipe(fs.createWriteStream(savePath))
+    .on("close", () => {
+      alert("Обновление скачано. Перезапускаю Shark...");
+      nw.App.quit();
+    });
+});
 </script>
 </body>
 </html>
