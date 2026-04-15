@@ -1,16 +1,29 @@
 {
-  "name": "my-messenger",
+  "name": "shark-desktop",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Shark Messenger Desktop",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron .",
+    "build": "electron-builder"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^5.2.1",
-    "socket.io": "^4.8.3"
+  "author": "Kiks",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.kiks.shark",
+    "productName": "Shark",
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "shark.html",
+      "package.json"
+    ]
   }
 }
